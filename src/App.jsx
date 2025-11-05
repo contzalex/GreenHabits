@@ -43,7 +43,7 @@ export default function App() {
   
 
  return (
-    <div className="min-h-screen bg-[#f5e6d3] font-sans">
+    <div className="min-h-screen bg-[#F5EFE6] font-sans">
       <Header
         isLoggedIn={isLoggedIn}
         toggleLoginState={toggleLoginState}
