@@ -3,7 +3,7 @@ import './App.css'
 import { Routes, Route, Link, Navigate } from "react-router-dom";
 import Profile from "./pages/Profile";
 import Stats from "./pages/Stats";
-import Login from "./pages/Signin";
+import Login from "./pages/Login";
 import Header from "./components/Header";
 import Home from "./pages/Home";
 
