@@ -3,7 +3,7 @@ import './App.css'
 import { Routes, Route, Link, Navigate, useLocation } from "react-router-dom";
 import Profile from "./pages/Profile";
 import Stats from "./pages/Stats";
-import Login from "./pages/Login";
+import Login from "./pages/Signin";
 
 export default function App() {
   const location = useLocation();
