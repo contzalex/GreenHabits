@@ -69,10 +69,10 @@ button:focus-visible {
 }
 
 @theme {
-  --color-darkgreen: #255938; 
-  --color-salmon: #dc9b7d;
+  --color-darkgreen: #255938;
+  --color-fundal: #F5EFE6 ; 
+  --color-earth: #b39283;
   --color-beige: #e9dcc3;
-  --color-mint: #9FB99D;
-  --color-fundal: #F5EFE6 ;
-
+  --color-bigbox:#DDE6DE;
+  --color-smallbox: #c5d9d0;
 }

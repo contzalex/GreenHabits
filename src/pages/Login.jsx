@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
-  loginWithEmailAndPassword,
-  registerWithEmailAndPassword,
-  registerWithGoogle
-} from "../pages/LoginData"; // <- importă funcțiile Firebase
+  loginWithEmail,
+  registerWithEmail,
+  loginWithGoogle
+} from "./authService";
 
 const Login = ({ setIsLoggedIn }) => {
   const navigate = useNavigate();
@@ -18,9 +18,9 @@ const Login = ({ setIsLoggedIn }) => {
   e.preventDefault();
   try {
     if (isLoginMode) {
-      await loginWithEmailAndPassword(email, password);
+      await loginWithEmail(email, password)
     } else {
-      await registerWithEmailAndPassword(email, password);
+      await registerWithEmail(email, password)
     }
 
     setIsLoggedIn(true);
@@ -33,7 +33,7 @@ const Login = ({ setIsLoggedIn }) => {
 
   const handleGoogleLogin = async () => {
   try {
-    await registerWithGoogle();
+    await loginWithGoogle();
     setIsLoggedIn(true);
     navigate("/profile");
   } catch (err) {
@@ -43,7 +43,7 @@ const Login = ({ setIsLoggedIn }) => {
 };
 
   return (
-    <div className="w-[430px] bg-mint p-8 rounded-2xl shadow-lg mx-auto mt-4">
+    <div className="w-[430px] bg-bigbox p-8 rounded-2xl shadow-lg mx-auto mt-4">
       <h2 className="text-3xl font-semibold text-center text-darkgreen mb-6">
         {isLoginMode ? "Welcome Back!" : "Create an Account"}
       </h2>
@@ -58,20 +58,20 @@ const Login = ({ setIsLoggedIn }) => {
           <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={(e)=>setConfirmPassword(e.target.value)} className="..." />
         )}
 
-        {error && <p className="text-red-600 text-center mb-2">{error}</p>}
+        {error && <p className="text-darkgreen text-center mb-2">{error}</p>}
 
         <button type="submit" className="...">
           {isLoginMode ? "Login" : "Sign Up"}
         </button>
       </form>
 
-      <button onClick={handleGoogleLogin} className="w-full bg-white border mt-2 py-2 rounded-md">
+      <button onClick={handleGoogleLogin} className="w-full bg-beige border border-earth mt-2 py-2 rounded-md text-darkgreen hover:bg-earth transition">
         Continue with Google
       </button>
 
-      <p className="text-center mt-4">
+      <p className="text-center mt-4 text-darkgreen">
         {isLoginMode ? "Don't have an account?" : "Already have an account?"}
-        <a href="#" onClick={(e) => { e.preventDefault(); setIsLoginMode(!isLoginMode); }} className="text-darkgreen font-semibold ml-1">
+        <a href="#" onClick={(e) => { e.preventDefault(); setIsLoginMode(!isLoginMode); }} className="text-darkgreen font-semibold ml-1 hover:text-earth">
           {isLoginMode ? "Sign Up" : "Login"}
         </a>
       </p>

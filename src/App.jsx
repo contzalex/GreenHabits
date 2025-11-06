@@ -43,12 +43,29 @@ export default function App() {
   
 
  return (
-    <div className="min-h-screen bg-[#F5EFE6] font-sans">
+    <div className="min-h-screen bg-fundal font-sans">
       <Header
         isLoggedIn={isLoggedIn}
         toggleLoginState={toggleLoginState}
         handleLogout={handleLogout}
       />
+      
+      {isLoggedIn && (
+        <nav className="flex justify-center gap-4 py-4 px-6">
+          <Link 
+            to="/profile" 
+            className="bg-bigbox text-darkgreen px-6 py-2 rounded-lg font-semibold hover:bg-smallbox transition shadow-md"
+          >
+            Profile
+          </Link>
+          <Link 
+            to="/stats" 
+            className="bg-bigbox text-darkgreen px-6 py-2 rounded-lg font-semibold hover:bg-smallbox transition shadow-md"
+          >
+            Stats
+          </Link>
+        </nav>
+      )}
 
       <Routes>
         <Route path="/" element={<Home isLoggedIn={isLoggedIn} />} />
