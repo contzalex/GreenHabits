@@ -10,6 +10,9 @@ import Redeem from "./pages/Redeem";
 import DailyTasks from "./pages/DailyTasks";
 import { useAuth } from "./hooks/useAuth";
 import { AuthProvider } from "./components/AuthProvider";
+import { db } from "./firebase/firebase_config";
+
+console.log("Firestore conectat:", db);
 
 function AppContent() {
   const { user, loading } = useAuth(); 
