@@ -4,9 +4,19 @@ import { doc, getDoc } from "firebase/firestore";
 import { useAuth } from "../hooks/useAuth";
 
 export default function Profile() {
-  const { user } = useAuth(); // logged-in user
-  const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState({
+  name: "Jane Doe",
+  username: "ecoJane",
+  email: "jane@example.com",
+  totalHabits: 42,
+  ecoPoints: 850, // 🔹 punctele eco adăugate aici
+  profilePicture: "", // inițial fără poză
+});
+
+  
+  const firstName = user?.name?.split(" ")[0] || "Profile";
+  const [newUsername, setNewUsername] = useState(user.username);
+  const [newProfilePic, setNewProfilePic] = useState("");
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -49,17 +59,49 @@ export default function Profile() {
   }
 
   return (
-    <main className="p-6 max-w-2xl mx-auto space-y-6">
-      {/* Profile Section */}
-      <section className="bg-bigbox p-6 rounded shadow-md">
-        <h2 className="text-2xl font-semibold mb-4 text-darkgreen">Profile</h2>
-        <p className="text-darkgreen"><strong>Name:</strong> {userData.username}</p>
-        <p className="text-darkgreen"><strong>Email:</strong> {user.email}</p>
-        <p className="text-darkgreen"><strong>Puncte:</strong> {userData.points}</p>
-        <p className="text-darkgreen">
-          <strong>Total Habits Completed:</strong>{" "}
-          {userData.completedHabits?.length || 0}
-        </p>
+    <main className="p-10 max-w-5xl mx-auto space-y-10">
+       {/* 🔹 Text principal */}
+<div className="text-center max-w-4xl mx-auto mt-16 mb-16">
+  <h1 className="text-3xl md:text-5xl font-bold text-darkgreen mb-6 leading-tight">
+    Congratulations! You currently have <span className="font-bold">{user?.ecoPoints || 0}</span> Eco Points 🌿
+  </h1>
+  
+  
+</div>
+      {/* Card principal */}
+      <section className="bg-[#DDE6D6] p-12 rounded-3xl shadow-xl border border-[#C9D7C3] h-[500px] flex">
+        {/* Informații utilizator */}
+        <div className="flex-1 flex flex-col justify-center space-y-4 text-lg">
+          <h2 className="text-4xl font-semibold mb-4 text-[#2E4D32]">Profile</h2>
+          <p className="text-[#2E4D32]">
+            <strong>Name:</strong> {user.name}
+          </p>
+          <p className="text-[#2E4D32]">
+            <strong>Username:</strong> {user.username}
+          </p>
+          <p className="text-[#2E4D32]">
+            <strong>Email:</strong> {user.email}
+          </p>
+          <p className="text-[#2E4D32]">
+            <strong>Total Habits Completed:</strong> {user.totalHabits}
+          </p>
+        
+        </div>
+
+        {/* Poză de profil centrată vertical */}
+        <div className="flex-1 flex items-center justify-center">
+          {user.profilePicture ? (
+            <img
+              src={user.profilePicture}
+              alt="Profile"
+              className="w-64 h-64 object-cover rounded-full shadow-lg opacity-90"
+            />
+          ) : (
+            <div className="w-64 h-64 rounded-full bg-[#9BB597] flex items-center justify-center text-[#2E4D32] font-semibold opacity-50">
+              No Image
+            </div>
+          )}
+        </div>
       </section>
 
       {/* Habits Section */}
