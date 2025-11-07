@@ -1,54 +1,100 @@
 import React, { useState } from "react";
 
 export default function Profile() {
-  const user = { name: "Jane Doe", email: "jane@example.com", totalHabits: 42, streak: 7 };
+  const [user, setUser] = useState({
+    name: "Jane Doe",
+    username: "ecoJane",
+    email: "jane@example.com",
+    totalHabits: 42,
+    streak: 7,
+    profilePicture: "", // inițial fără poză
+  });
+  
+  const firstName = user?.name?.split(" ")[0] || "Profile";
+  const [newUsername, setNewUsername] = useState(user.username);
+  const [newProfilePic, setNewProfilePic] = useState("");
 
-  const [habits, setHabits] = useState([
-    { id: 1, name: "Morning Run", done: false },
-    { id: 2, name: "Read 20 Pages", done: true },
-    { id: 3, name: "Meditate", done: false },
-  ]);
+  const handleSaveUsername = () => {
+    setUser({ ...user, username: newUsername });
+  };
 
-  const toggleHabit = (id) => {
-    setHabits((prev) =>
-      prev.map((habit) =>
-        habit.id === id ? { ...habit, done: !habit.done } : habit
-      )
-    );
+  const handleUploadProfilePic = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setUser({ ...user, profilePicture: imageUrl });
+    }
   };
 
   return (
-    <main className="p-6 max-w-2xl mx-auto space-y-6">
-      <section className="bg-bigbox p-6 rounded shadow-md">
-        <h2 className="text-2xl font-semibold mb-4 text-darkgreen">Profile</h2>
-        <p className="text-darkgreen"><strong>Name:</strong> {user.name}</p>
-        <p className="text-darkgreen"><strong>Email:</strong> {user.email}</p>
-        <p className="text-darkgreen"><strong>Total Habits Completed:</strong> {user.totalHabits}</p>
-        <p className="text-darkgreen"><strong>Current Streak:</strong> {user.streak} days</p>
+    <main className="p-10 max-w-5xl mx-auto space-y-10">
+      {/* Card principal */}
+      <section className="bg-[#DDE6D6] p-12 rounded-3xl shadow-xl border border-[#C9D7C3] h-[500px] flex">
+        {/* Informații utilizator */}
+        <div className="flex-1 flex flex-col justify-center space-y-4 text-lg">
+          <h2 className="text-4xl font-semibold mb-4 text-[#2E4D32]">Profile</h2>
+          <p className="text-[#2E4D32]">
+            <strong>Name:</strong> {user.name}
+          </p>
+          <p className="text-[#2E4D32]">
+            <strong>Username:</strong> {user.username}
+          </p>
+          <p className="text-[#2E4D32]">
+            <strong>Email:</strong> {user.email}
+          </p>
+          <p className="text-[#2E4D32]">
+            <strong>Total Habits Completed:</strong> {user.totalHabits}
+          </p>
+          <p className="text-[#2E4D32]">
+            <strong>Current Streak:</strong> {user.streak} days
+          </p>
+        </div>
+
+        {/* Poză de profil centrată vertical */}
+        <div className="flex-1 flex items-center justify-center">
+          {user.profilePicture ? (
+            <img
+              src={user.profilePicture}
+              alt="Profile"
+              className="w-64 h-64 object-cover rounded-full shadow-lg opacity-90"
+            />
+          ) : (
+            <div className="w-64 h-64 rounded-full bg-[#9BB597] flex items-center justify-center text-[#2E4D32] font-semibold opacity-50">
+              No Image
+            </div>
+          )}
+        </div>
       </section>
 
-      <section className="bg-bigbox p-6 rounded shadow-md">
-        <h3 className="text-xl font-semibold mb-4 text-darkgreen">Your Habits</h3>
-        <ul className="space-y-4">
-          {habits.map((habit) => (
-            <li
-              key={habit.id}
-              className={`flex items-center justify-between p-3 border rounded shadow-sm transition ${
-                habit.done ? "bg-smallbox text-darkgreen" : "bg-earth"
-              }`}
-            >
-              <span className="text-darkgreen">{habit.name}</span>
-              <button
-                onClick={() => toggleHabit(habit.id)}
-                className={`px-3 py-1 rounded text-sm font-medium transition ${
-                  habit.done ? "bg-beige text-darkgreen" : "bg-fundal text-darkgreen hover:bg-darkgreen hover:text-white"
-                }`}
-              >
-                {habit.done ? "Done" : "Mark Done"}
-              </button>
-            </li>
-          ))}
-        </ul>
+      {/* Card editare username + poză */}
+      <section className="bg-[#DDE6D6] p-10 rounded-3xl shadow-lg border border-[#E2D9C9] space-y-6">
+        <h3 className="text-2xl font-semibold text-[#2E4D32]">Edit Username</h3>
+
+        <div className="flex flex-col sm:flex-row gap-4 items-center">
+          <input
+            type="text"
+            value={newUsername}
+            onChange={(e) => setNewUsername(e.target.value)}
+            className="w-full sm:w-2/3 border border-[#9BB597] rounded-xl px-4 py-2 text-[#2E4D32] bg-white focus:outline-none focus:ring-2 focus:ring-[#B6CEB4]"
+          />
+          <button
+            onClick={handleSaveUsername}
+            className="bg-[#B6CEB4] hover:bg-[#A5C1A2] text-[#2E4D32] font-semibold px-6 py-2 rounded-xl shadow-md transition"
+          >
+            Save
+          </button>
+        </div>
+
+        {/* Upload poză de profil */}
+        <div className="space-y-4 pt-6">
+          <h3 className="text-xl font-semibold text-[#2E4D32]">Edit Profile Picture</h3>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleUploadProfilePic}
+            className="w-full sm:w-2/3 border border-[#9BB597] rounded-xl px-4 py-2 bg-white text-[#2E4D32] focus:outline-none focus:ring-2 focus:ring-[#B6CEB4]"
+          />
+        </div>
       </section>
     </main>
   );

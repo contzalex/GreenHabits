@@ -41,12 +41,6 @@ function AppContent() {
       {isLoggedIn && (
         <nav className="flex justify-center gap-4 py-4 px-6">
           <Link
-            to="/profile"
-            className="bg-bigbox text-darkgreen px-6 py-2 rounded-lg font-semibold hover:bg-smallbox transition shadow-md"
-          >
-            Profile
-          </Link>
-          <Link
             to="/stats"
             className="bg-bigbox text-darkgreen px-6 py-2 rounded-lg font-semibold hover:bg-smallbox transition shadow-md"
           >
