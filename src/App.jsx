@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import Leaderboard from "./pages/Leaderboard";
 import Redeem from "./pages/Redeem";
 import Map from "./pages/Map";
+import Rent from "./pages/Rent";
 import DailyTasks from "./pages/DailyTasks";
 import 'leaflet/dist/leaflet.css';
 import { useAuth } from "./hooks/useAuth";
@@ -42,18 +43,18 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-fundal font-sans mt-auto">
       <Header />
-      <div className="flex-1 pt-4 sm:pt-6 md:pt-8">
-        <Routes>
-          <Route path="/" element={<Home isLoggedIn={isLoggedIn} />} />
-          <Route path="/profile" element={isLoggedIn ? <Profile habits={habits} toggleHabit={toggleHabit} /> : <Navigate to="/login" />} />
-          <Route path="/stats" element={isLoggedIn ? <Stats habits={habits} /> : <Navigate to="/login" />} />
-          <Route path="/leaderboard" element={isLoggedIn ? <Leaderboard /> : <Navigate to="/login" />} />
-          <Route path="/redeem" element={isLoggedIn ? <Redeem /> : <Navigate to="/login" />} />
-          <Route path="/tasks" element={isLoggedIn ? <DailyTasks /> : <Navigate to="/login" />} />
-          <Route path="/map" element={isLoggedIn ? <Map /> : <Navigate to="/login" />} />
-          <Route path="/login" element={!isLoggedIn ? <Login /> : <Navigate to="/profile" />} />
-        </Routes>
-      </div>
+
+      <Routes>
+        <Route path="/" element={<Home isLoggedIn={isLoggedIn} />} />
+        <Route path="/profile" element={isLoggedIn ? <Profile habits={habits} toggleHabit={toggleHabit} /> : <Navigate to="/login" />} />
+        <Route path="/stats" element={isLoggedIn ? <Stats habits={habits} /> : <Navigate to="/login" />} />
+        <Route path="/leaderboard" element={isLoggedIn ? <Leaderboard /> : <Navigate to="/login" />} />
+        <Route path="/redeem" element={isLoggedIn ? <Redeem /> : <Navigate to="/login" />} />
+        <Route path="/tasks" element={isLoggedIn ? <DailyTasks /> : <Navigate to="/login" />} />
+        <Route path="/rent" element={isLoggedIn ? <Rent /> : <Navigate to="/login" />} />
+        <Route path="/map" element={isLoggedIn ? <Map /> : <Navigate to="/login" />} />
+        <Route path="/login" element={!isLoggedIn ? <Login /> : <Navigate to="/profile" />} />
+      </Routes>
     </div>
   );
 }
