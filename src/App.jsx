@@ -6,6 +6,7 @@ import Stats from "./pages/Stats";
 import Login from "./pages/Login";
 import Header from "./components/Header";
 import Home from "./pages/Home";
+import Redeem from "./pages/Redeem";
 import { useAuth } from "./hooks/useAuth";
 import { AuthProvider } from "./components/AuthProvider";
 
@@ -50,6 +51,12 @@ function AppContent() {
           >
             Stats
           </Link>
+          <Link
+            to="/redeem"
+            className="bg-bigbox text-darkgreen px-6 py-2 rounded-lg font-semibold hover:bg-smallbox transition shadow-md"
+          >
+            Redeem
+          </Link>
         </nav>
       )}
 
@@ -70,6 +77,16 @@ function AppContent() {
           element={
             isLoggedIn ? (
               <Stats habits={habits} />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+                <Route
+          path="/redeem"
+          element={
+            isLoggedIn ? (
+              <Redeem />
             ) : (
               <Navigate to="/login" />
             )
