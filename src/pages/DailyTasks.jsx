@@ -72,7 +72,6 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// Save/load tasks to localStorage
 function getStoredTasks(dateKey) {
   const stored = localStorage.getItem("daily-tasks-history");
   if (!stored) return null;
@@ -98,7 +97,8 @@ function getDailyTasks(dateKey) {
       category: cat.name,
       key: cat.key,
       points: getRandomInt(5, 20),
-      done: false
+      done: false,
+      proof: null
     };
   });
   storeTasks(dateKey, selection);
@@ -113,6 +113,67 @@ const sampleYesterdayTasks = [
   { category: "Digital Sustainability", text: "Use dark mode on your devices", points: 7, done: false }
 ];
 
+function ProofModal({ open, onClose, onSubmit }) {
+  const [file, setFile] = useState(null);
+
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
+      <div className="bg-bigbox rounded-2xl shadow-lg p-6 border border-smallbox w-full max-w-md"
+        style={{ backgroundColor: "var(--color-bigbox)", borderColor: "var(--color-smallbox)" }}>
+        <h3 className="text-xl font-bold mb-4 text-darkgreen">Prove your task</h3>
+        <form onSubmit={e => {
+          e.preventDefault();
+          onSubmit({ file });
+        }}>
+          <div className="mb-4">
+            <label className="block text-darkgreen font-semibold mb-1">Upload Photo:</label>
+            <label
+              htmlFor="photo-upload"
+              className="inline-block px-4 py-2 rounded-lg border border-darkgreen cursor-pointer font-semibold"
+              style={{
+                backgroundColor: "var(--color-fundal)",
+                borderColor: "var(--color-darkgreen)",
+                color: "var(--color-darkgreen)",
+                transition: "background 0.2s"
+              }}
+              onMouseEnter={e => (e.target.style.backgroundColor = "var(--color-beige)")}
+              onMouseLeave={e => (e.target.style.backgroundColor = "var(--color-fundal)")}
+            >
+              {file ? file.name : "Choose Photo"}
+              <input
+                id="photo-upload"
+                type="file"
+                accept="image/*"
+                onChange={e => setFile(e.target.files[0])}
+                className="hidden"
+                required
+              />
+            </label>
+          </div>
+          <div className="flex justify-end gap-2 mt-2">
+            <button
+              type="button"
+              className="px-4 py-2 rounded bg-beige border border-darkgreen text-darkgreen font-semibold"
+              style={{ backgroundColor: "var(--color-beige)", borderColor: "var(--color-darkgreen)" }}
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded bg-darkgreen text-fundal font-semibold"
+              style={{ backgroundColor: "var(--color-darkgreen)", color: "var(--color-fundal)" }}
+            >
+              Submit Proof
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export default function DailyTasks() {
   const today = new Date();
   const todayKey = today.toISOString().slice(0, 10);
@@ -121,21 +182,29 @@ export default function DailyTasks() {
   const yesterdayKey = yesterdayDate.toISOString().slice(0, 10);
 
   const [tasks, setTasks] = useState(() => getDailyTasks(todayKey));
+  const [proofIdx, setProofIdx] = useState(null);
   const yesterdayTasks = getStoredTasks(yesterdayKey) || sampleYesterdayTasks;
 
-  const toggleDone = idx => {
+  const handleSubmitProof = (proof) => {
     const updated = [...tasks];
-    updated[idx].done = !updated[idx].done;
+    updated[proofIdx] = {
+      ...updated[proofIdx],
+      done: true,
+      proof
+    };
     setTasks(updated);
     storeTasks(todayKey, updated);
+    setProofIdx(null);
   };
 
   return (
-    <main
-      className="min-h-screen px-8 py-6"
-      style={{ backgroundColor: "var(--color-fundal)" }}
-    >
+    <main className="min-h-screen px-8 py-6" style={{ backgroundColor: "var(--color-fundal)" }}>
       <div className="mx-auto max-w-7xl">
+        <ProofModal
+          open={proofIdx !== null}
+          onClose={() => setProofIdx(null)}
+          onSubmit={handleSubmitProof}
+        />
         <div className="flex flex-col md:flex-row gap-4 w-full">
           {/* Today's tasks */}
           <section
@@ -163,31 +232,42 @@ export default function DailyTasks() {
                       <span className="font-bold">{task.category}: </span>
                       {task.text}
                     </div>
-                    <span className="ml-0 sm:ml-6 mt-2 sm:mt-0 text-base font-semibold flex-shrink-0 flex items-center justify-end whitespace-nowrap" style={{ minWidth: "120px" }}>
-                      Reward: {task.points} <span className="ml-1" role="img" aria-label="EcoPoints">🤑</span>
+                    <span
+                      className="ml-0 sm:ml-6 mt-2 sm:mt-0 text-base font-semibold flex-shrink-0 flex items-center justify-end whitespace-nowrap"
+                      style={{ minWidth: "120px" }}
+                    >
+                      Reward: {task.points}
+                      <span className="ml-1" role="img" aria-label="EcoPoints">
+                        🤑
+                      </span>
                     </span>
                   </div>
                   <button
-                    onClick={() => toggleDone(idx)}
+                    onClick={() => !task.done && setProofIdx(idx)}
                     className="ml-4 px-4 py-2 rounded-lg font-semibold border border-darkgreen transition"
                     style={{
                       backgroundColor: !task.done ? "var(--color-fundal)" : "var(--color-smallbox)",
                       borderColor: "var(--color-darkgreen)",
                       color: "var(--color-darkgreen)"
                     }}
+                    disabled={task.done}
                   >
-                    {task.done ? "Done" : "Mark as done"}
+                    {task.done ? "Done" : "Done?"}
                   </button>
                 </li>
               ))}
             </ul>
           </section>
+
           {/* Yesterday's tasks */}
           <section
             className="bg-bigbox rounded-2xl shadow-md p-8 border border-smallbox flex-1"
             style={{ backgroundColor: "var(--color-bigbox)", borderColor: "var(--color-smallbox)" }}
           >
-            <h2 className="text-3xl font-extrabold mb-8 text-right" style={{ color: "var(--color-darkgreen)" }}>
+            <h2
+              className="text-3xl font-extrabold mb-8 text-right"
+              style={{ color: "var(--color-darkgreen)" }}
+            >
               Yesterday's Tasks <span className="text-xl">📅</span>
             </h2>
             <ul className="space-y-5">
@@ -206,8 +286,14 @@ export default function DailyTasks() {
                       <span className="font-bold">{task.category}: </span>
                       {task.text}
                     </div>
-                    <span className="ml-0 sm:ml-6 mt-2 sm:mt-0 text-base font-semibold flex-shrink-0 flex items-center justify-end whitespace-nowrap" style={{ minWidth: "120px" }}>
-                      Reward: {task.points} <span className="ml-1" role="img" aria-label="EcoPoints">🤑</span>
+                    <span
+                      className="ml-0 sm:ml-6 mt-2 sm:mt-0 text-base font-semibold flex-shrink-0 flex items-center justify-end whitespace-nowrap"
+                      style={{ minWidth: "120px" }}
+                    >
+                      Reward: {task.points}
+                      <span className="ml-1" role="img" aria-label="EcoPoints">
+                        🤑
+                      </span>
                     </span>
                   </div>
                   <span
