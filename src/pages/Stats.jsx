@@ -1,22 +1,12 @@
 import { useState, useMemo } from "react";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import {
-  format,
-  startOfMonth,
-  endOfMonth,
-  eachDayOfInterval,
-  getDay,
+  format, startOfMonth, endOfMonth, eachDayOfInterval, getDay,
 } from "date-fns";
 
+// ECO config
 const ecoFactors = {
   "Riding a bike 🚲": 2.5,
   "Donating clothes 👕": 3.0,
@@ -27,15 +17,29 @@ const ecoFactors = {
 };
 const ecoActionsList = Object.keys(ecoFactors);
 
-function genActionsForPastMonth(daysArr) {
+// === DETERMINISTIC GENERATION ===
+function stableMonthSeed(year, month) {
+  let str = `${year}-${month}-eco`;
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i); hash |= 0;
+  }
+  return Math.abs(hash);
+}
+function seededRandom(seed) {
+  let x = Math.sin(seed) * 10000; return x - Math.floor(x);
+}
+function stableActionsForMonth(year, month, daysArr) {
   const allTypes = ecoActionsList;
   const maxN = daysArr.length >= 30 ? 25 : daysArr.length;
   const minN = daysArr.length >= 30 ? 20 : Math.max(10, Math.floor(daysArr.length * 0.7));
-  const actionsN = minN + Math.floor(Math.random() * (maxN - minN + 1));
+  const seed = stableMonthSeed(year, month);
+  const actionsN = minN + Math.floor(seededRandom(seed + 42) * (maxN - minN + 1));
   const daysPool = [...daysArr];
   let usedDays = [];
+  let loopSeed = seed + 101;
   while (usedDays.length < actionsN && daysPool.length > 0) {
-    const idx = Math.floor(Math.random() * daysPool.length);
+    const idx = Math.floor(seededRandom(loopSeed++) * daysPool.length);
     usedDays.push(daysPool[idx]);
     daysPool.splice(idx, 1);
     if (daysPool.length === 0 && usedDays.length < actionsN) {
@@ -43,8 +47,10 @@ function genActionsForPastMonth(daysArr) {
     }
   }
   let groupedActions = {};
+  let loopSeed2 = seed + 303;
   usedDays.forEach((day, i) => {
-    const type = allTypes[Math.floor(Math.random() * allTypes.length)];
+    const typeIdx = Math.floor(seededRandom(loopSeed2 + i * 17) * allTypes.length);
+    const type = allTypes[typeIdx];
     const key = `${day}|${type}`;
     if (!groupedActions[key])
       groupedActions[key] = { day, name: type, count: 0 };
@@ -80,7 +86,6 @@ export default function Stats() {
   const todayNum = now.getDate();
   const todayMonth = now.getMonth();
   const todayYear = now.getFullYear();
-
   const [displayedMonth, setDisplayedMonth] = useState(
     new Date(todayYear, todayMonth, 1)
   );
@@ -107,7 +112,7 @@ export default function Stats() {
         impact: parseFloat(ecoFactors[name].toFixed(2)),
       }));
     } else {
-      const { actions: acts, tab: tabL } = genActionsForPastMonth(daysInMonth);
+      const { actions: acts, tab: tabL } = stableActionsForMonth(year, month, daysInMonth);
       ecoDays = acts.map(a => a.day);
       actions = acts.map(a => ({
         ...a,
@@ -130,7 +135,18 @@ export default function Stats() {
     [displayedMonth]
   );
 
-  const totalLunarImpact = tab.reduce((sum, act) => sum + Number(act.impact), 0).toFixed(2);
+  const getLastMonthData = (date) => {
+    const prevMonth = new Date(date.getFullYear(), date.getMonth() - 1, 1);
+    return syncActionsAndEcoDays(prevMonth.getFullYear(), prevMonth.getMonth());
+  }
+  const currentImpact = tab.reduce((sum, act) => sum + Number(act.impact), 0);
+  const prevImpact = useMemo(() =>
+    getLastMonthData(displayedMonth).tab.reduce((sum, act) => sum + Number(act.impact), 0),
+    [displayedMonth]
+  );
+  const percentDiff = prevImpact > 0 ? Math.round((currentImpact - prevImpact) / prevImpact * 100) : 0;
+
+  const totalLunarImpact = currentImpact.toFixed(2);
   const currentStreak = getMaxConsecutiveStreak(ecoDays);
 
   function computeWeeklyStreaksForDisplayedMonth() {
@@ -174,8 +190,7 @@ export default function Stats() {
     }
     setDisplayedMonth(next);
   }
-  const navBtnClass =
-    "px-3 py-1 rounded-md font-semibold shadow-sm border transition disabled:opacity-50";
+
   const singleLeafIcon = (
     <span
       className="text-2xl leading-none drop-shadow-sm"
@@ -186,59 +201,79 @@ export default function Stats() {
     </span>
   );
   const streakDays = new Set(ecoDays);
+  const isNovember2025 =
+    displayedMonth.getFullYear() === 2025 && displayedMonth.getMonth() === 10;
 
   return (
-    <main
-      className="p-6 bg-fundal min-h-screen"
-      style={{ backgroundColor: "var(--color-fundal)" }}
-    >
+    <main className="p-6 bg-fundal min-h-screen"
+      style={{ backgroundColor: "var(--color-fundal)" }}>
+      <style>{`
+        .earth-animated-btn {
+          transition: all .19s cubic-bezier(.43,1.36,.58,.86);
+          box-shadow: 0 2px 6px rgba(134,170,120,.12);
+          border: 2px solid var(--color-earth) !important;
+          background: var(--color-earth) !important;
+          color: var(--color-darkgreen) !important;
+        }
+        .earth-animated-btn:hover:not(:disabled) {
+          transform: scale(1.08) translateY(-2px);
+          background: #c5e2b4 !important;
+          border-color: #22692f !important;
+          box-shadow: 0 4px 20px 0 rgba(74,109,72,.15);
+        }
+        .earth-animated-btn:active:not(:disabled) {
+          transform: scale(.96) translateY(1.5px);
+          background: var(--color-earth) !important;
+          border-color: #22692f !important;
+        }
+        .earth-animated-btn:disabled {
+          border-color: #22692f !important;
+          background: var(--color-earth) !important;
+          color: var(--color-darkgreen) !important;
+          opacity: .5;
+        }
+        .impact-animated, .box-animated {
+          transition: transform .22s cubic-bezier(.43,1.36,.58,.86), box-shadow .32s cubic-bezier(.43,1.36,.58,.86);
+        }
+        .impact-animated:hover, .box-animated:hover {
+          transform: scale(1.025) translateY(-3px);
+          box-shadow: 0 7px 38px 0 #5bb9743c, 0 1.5px 18px rgba(85,100,70,0.14);
+        }
+      `}</style>
       <div className="mx-auto max-w-5xl space-y-8">
-        <section
-          className="bg-bigbox rounded-2xl shadow-md p-4 sm:p-6 border border-smallbox"
-          style={{
-            backgroundColor: "var(--color-bigbox)",
-            borderColor: "var(--color-smallbox)",
-          }}
-        >
-          <div className="mx-auto max-w-md">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
+        {/* Calendar + streak */}
+        <section className="bg-bigbox rounded-2xl shadow-md p-4 sm:p-20 border border-smallbox box-animated"
+          style={{ backgroundColor: "var(--color-bigbox)", borderColor: "var(--color-smallbox)" }}>
+          <div className="mx-auto" style={{ maxWidth: "40rem" }}>
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-6">
                 <button
                   onClick={prevMonth}
-                  className={navBtnClass}
-                  style={{
-                    background: "var(--color-darkgreen)",
-                    borderColor: "var(--color-darkgreen)",
-                    color: "var(--color-fundal)",
-                  }}
+                  className="earth-animated-btn"
                   aria-label="Previous month"
                 >
-                  ◀
+                  {"<"}
                 </button>
                 <h3
                   className="text-xl sm:text-2xl font-extrabold text-center"
                   style={{
                     color: "var(--color-darkgreen)",
-                    minWidth: "10rem",
+                    minWidth: "15rem",
                   }}
                 >
                   {format(displayedMonth, "MMMM yyyy")}
                 </h3>
                 <button
                   onClick={nextMonth}
-                  className={navBtnClass}
-                  style={{
-                    background: "var(--color-darkgreen)",
-                    borderColor: "var(--color-darkgreen)",
-                    color: "var(--color-fundal)",
-                  }}
+                  className="earth-animated-btn"
                   aria-label="Next month"
                   disabled={
                     displayedMonth.getFullYear() === now.getFullYear() &&
                     displayedMonth.getMonth() === now.getMonth()
                   }
+                  style={isNovember2025 ? { borderColor: "#22692f" } : {}}
                 >
-                  ▶
+                  {">"}
                 </button>
               </div>
               <div
@@ -262,7 +297,8 @@ export default function Stats() {
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-7 text-center font-bold mb-2 text-darkgreen text-xs sm:text-sm" style={{ color: "var(--color-darkgreen)" }}>
+            <div className="grid grid-cols-7 text-center font-bold mb-2 text-darkgreen text-xs sm:text-sm"
+              style={{ color: "var(--color-darkgreen)" }}>
               <div>Mon</div>
               <div>Tue</div>
               <div>Wed</div>
@@ -271,7 +307,7 @@ export default function Stats() {
               <div>Sat</div>
               <div>Sun</div>
             </div>
-            <div className="grid grid-cols-7 gap-2">
+            <div className="grid grid-cols-7 gap-3">
               {monthDays.map((d, idx) => {
                 const isEcoDay = ecoDays.includes(d);
                 const isInStreak = streakDays.has(d);
@@ -279,20 +315,20 @@ export default function Stats() {
                   "w-full aspect-square flex items-center justify-center rounded-lg text-xs sm:text-sm transition-all";
                 const ecoStyle = isEcoDay
                   ? {
-                      backgroundColor: "var(--color-earth)",
-                      color: "var(--color-darkgreen)",
-                      fontWeight: 700,
-                      boxShadow: "0 6px 10px rgba(0,0,0,0.06)",
-                    }
+                    backgroundColor: "var(--color-earth)",
+                    color: "var(--color-darkgreen)",
+                    fontWeight: 700,
+                    boxShadow: "0 6px 10px rgba(0,0,0,0.06)",
+                  }
                   : {
-                      backgroundColor: "var(--color-smallbox)",
-                      color: "var(--color-darkgreen)",
-                    };
+                    backgroundColor: "var(--color-smallbox)",
+                    color: "var(--color-darkgreen)",
+                  };
                 const streakStyle = isInStreak
                   ? {
-                      boxShadow: "0 0 0 3px var(--color-darkgreen)",
-                      transform: "scale(1.03)",
-                    }
+                    boxShadow: "0 0 0 3px var(--color-darkgreen)",
+                    transform: "scale(1.03)",
+                  }
                   : undefined;
                 return (
                   <div
@@ -329,35 +365,35 @@ export default function Stats() {
         </section>
         {/* Impact & Sustainable actions */}
         <div className="flex flex-col md:flex-row gap-6 mb-8 mt-10">
-          <div className="flex-1 bg-bigbox rounded-2xl shadow-md py-4 px-6 border border-smallbox"
-               style={{background: "var(--color-bigbox)", color: "var(--color-darkgreen)", borderColor: "var(--color-smallbox)"}}>
+          <div className="flex-1 bg-bigbox rounded-2xl shadow-md py-4 px-6 border border-smallbox box-animated"
+            style={{ background: "var(--color-bigbox)", color: "var(--color-darkgreen)", borderColor: "var(--color-smallbox)" }}>
             <h3 className="text-lg font-bold mb-3">Sustainable actions this month</h3>
             <ul className="space-y-2">
               {tab.map(act => (
                 <li key={act.name}
-                    className="flex justify-between items-center rounded-lg bg-earth px-3 py-2"
-                    style={{background: "var(--color-earth)", color: "var(--color-darkgreen)"}}>
+                  className="flex justify-between items-center rounded-lg bg-earth px-3 py-2"
+                  style={{ background: "var(--color-earth)", color: "var(--color-darkgreen)" }}>
                   <span>
                     {act.name} {act.count > 1 ? `x${act.count}` : ""}
                   </span>
-                  <span className="text-sm font-semibold" style={{minWidth: '60px', textAlign: 'right'}}>
+                  <span className="text-sm font-semibold" style={{ minWidth: '60px', textAlign: 'right' }}>
                     {act.impact} kg CO₂
                   </span>
                 </li>
               ))}
             </ul>
           </div>
-          {/* Right: monthly eco impact */}
-          <div className="flex-1 flex flex-col items-center justify-center rounded-2xl shadow-md p-7 border border-smallbox shadow-lg relative overflow-hidden"
-               style={{
-                 background: "var(--color-earth)",
-                 color: "var(--color-darkgreen)",
-                 borderColor: "var(--color-smallbox)",
-                 minHeight: 260,
-                 display: 'flex',
-                 justifyContent: 'center',
-                 alignItems: 'center'
-               }}>
+          {/* Monthly eco impact */}
+          <div className="flex-1 flex flex-col items-center justify-center rounded-2xl shadow-md p-7 border border-smallbox shadow-lg relative overflow-hidden impact-animated box-animated"
+            style={{
+              background: "var(--color-earth)",
+              color: "var(--color-darkgreen)",
+              borderColor: "var(--color-smallbox)",
+              minHeight: 260,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}>
             <img
               src="https://user-gen-media-assets.s3.amazonaws.com/gemini_images/fcc94e40-fdab-4e36-88fc-fa8eee56d902.png"
               alt="CO2 eco leaf"
@@ -374,48 +410,53 @@ export default function Stats() {
                 filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.09))"
               }}
             />
-            <span className="text-xl font-bold mb-3 z-10" style={{letterSpacing:"0.01em"}}>Your Ecological Impact This Month</span>
-            <span className="text-5xl font-extrabold mb-3 z-10 flex gap-2 items-center" style={{color: "var(--color-darkgreen)"}}>
+            <span className="text-xl font-bold mb-3 z-10" style={{ letterSpacing: "0.01em" }}>Your Ecological Impact This Month</span>
+            <span className="text-5xl font-extrabold mb-3 z-10 flex gap-2 items-center" style={{ color: "var(--color-darkgreen)" }}>
               {totalLunarImpact} kg CO₂
               <span className="text-3xl" aria-label="Earth">🌍</span>
             </span>
-            <span className="text-lg font-semibold text-center mt-1 z-10" style={{color: "var(--color-darkgreen)", lineHeight: 1.35}}>
+            <span className="text-lg font-semibold text-center mt-1 z-10" style={{ color: "var(--color-darkgreen)", lineHeight: 1.35 }}>
               You have saved <b>{totalLunarImpact} kg CO₂</b> through your sustainable actions this month!
             </span>
             <span className="uppercase tracking-wide mt-4 text-[1.1rem] font-medium z-10"
-                  style={{color:'#357d55',letterSpacing:'0.05em'}}>
+              style={{ color: '#357d55', letterSpacing: '0.05em' }}>
             </span>
           </div>
         </div>
       </div>
       {/* Weekly eco streak chart */}
-      <div className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 mt-6">
+      <div className="w-full flex justify-center mt-10">
         <section
-          className="bg-bigbox rounded-2xl shadow-md p-4 sm:p-6 border-t border-smallbox"
+          className="bg-bigbox rounded-2xl shadow-md p-4 sm:p-7 border-t box-animated"
           style={{
             backgroundColor: "var(--color-bigbox)",
-            borderColor: "var(--color-smallbox)",
-          }}
-        >
-          <div className="mx-auto max-w-[1400px]">
-            <div className="flex items-center justify-between mb-3">
+            borderColor: "var(--color-earth)",
+            borderWidth: 2,
+            boxSizing: "border-box",
+            maxWidth: "120rem",
+            width: "100%",
+          }}>
+          <div>
+            <div className="flex flex-col items-center justify-between mb-3">
               <h3
-                className="text-xl sm:text-2xl font-bold text-darkgreen"
+                className="text-xl sm:text-2xl font-bold text-darkgreen mb-1"
                 style={{ color: "var(--color-darkgreen)" }}
               >
                 Weekly Eco Actions
               </h3>
               <div
-                className="text-sm"
-                style={{ color: "var(--color-darkgreen)" }}
+                className="font-bold text-xl"
+                style={{
+                  color: "#22692f",
+                  marginBottom: "10px",
+                  marginTop: "0.1rem",
+                  letterSpacing: '0.02em'
+                }}
               >
-                {displayedMonth.getMonth() === now.getMonth() &&
-                  displayedMonth.getFullYear() === now.getFullYear()
-                  ? "Showing until current week"
-                  : "Sample data"}
+                {format(displayedMonth, "MMMM yyyy")}
               </div>
             </div>
-            <div style={{ width: "100%", height: 260 }}>
+            <div style={{ width: "100%", height: 320 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={weeklyData}
@@ -424,8 +465,8 @@ export default function Stats() {
                   barCategoryGap="30%"
                 >
                   <CartesianGrid
-                    stroke="var(--color-beige)"
-                    strokeDasharray="3 3"
+                    stroke="var(--color-earth)"
+                    strokeDasharray="2 0"
                   />
                   <XAxis
                     dataKey="week"
@@ -434,28 +475,36 @@ export default function Stats() {
                   <YAxis
                     tick={{ fill: "var(--color-darkgreen)", fontWeight: 700 }}
                     allowDecimals={false}
+                    axisLine={{ stroke: "var(--color-earth)" }}
+                    tickLine={{ stroke: "var(--color-earth)" }}
                   />
                   <Tooltip
-                    cursor={{ fill: "rgba(0,0,0,0.03)" }}
+                    cursor={{ fill: "rgba(0,0,0,0.04)" }}
                     contentStyle={{
                       backgroundColor: "var(--color-bigbox)",
                       borderRadius: "8px",
-                      border: "1px solid var(--color-smallbox)",
+                      border: "2px solid var(--color-earth)",
                       color: "var(--color-darkgreen)",
                     }}
                   />
                   <Legend />
                   <Bar
                     dataKey="actions"
-                    name="Streak days"
+                    name="Eco Actions"
                     fill="var(--color-earth)"
                     stroke="var(--color-darkgreen)"
-                    strokeWidth={2}
+                    strokeWidth={3}
                     radius={[10, 10, 6, 6]}
                     barSize={28}
                   />
                 </BarChart>
               </ResponsiveContainer>
+            </div>
+            <div className="font-semibold mt-5 ml-2 text-[1.08rem] text-center"
+              style={{ color: (percentDiff >= 0 ? "#1f7d2c" : "#b71c1c") }}>
+              {percentDiff >= 0
+                ? `+${percentDiff}% compared to last month`
+                : `${percentDiff}% compared to last month`}
             </div>
           </div>
         </section>
