@@ -2,13 +2,14 @@ import React, { useState } from "react";
 
 export default function Profile() {
   const [user, setUser] = useState({
-    name: "Jane Doe",
-    username: "ecoJane",
-    email: "jane@example.com",
-    totalHabits: 42,
-    streak: 7,
-    profilePicture: "", // inițial fără poză
-  });
+  name: "Jane Doe",
+  username: "ecoJane",
+  email: "jane@example.com",
+  totalHabits: 42,
+  ecoPoints: 850, // 🔹 punctele eco adăugate aici
+  profilePicture: "", // inițial fără poză
+});
+
   
   const firstName = user?.name?.split(" ")[0] || "Profile";
   const [newUsername, setNewUsername] = useState(user.username);
@@ -28,6 +29,14 @@ export default function Profile() {
 
   return (
     <main className="p-10 max-w-5xl mx-auto space-y-10">
+       {/* 🔹 Text principal */}
+<div className="text-center max-w-4xl mx-auto mt-16 mb-16">
+  <h1 className="text-3xl md:text-5xl font-bold text-darkgreen mb-6 leading-tight">
+    Congratulations! You currently have <span className="font-bold">{user?.ecoPoints || 0}</span> Eco Points 🌿
+  </h1>
+  
+  
+</div>
       {/* Card principal */}
       <section className="bg-[#DDE6D6] p-12 rounded-3xl shadow-xl border border-[#C9D7C3] h-[500px] flex">
         {/* Informații utilizator */}
@@ -45,9 +54,7 @@ export default function Profile() {
           <p className="text-[#2E4D32]">
             <strong>Total Habits Completed:</strong> {user.totalHabits}
           </p>
-          <p className="text-[#2E4D32]">
-            <strong>Current Streak:</strong> {user.streak} days
-          </p>
+        
         </div>
 
         {/* Poză de profil centrată vertical */}

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 
+
 const origRewards = [
   // Transportation
   {
@@ -228,3 +229,4 @@ export default function Redeem() {
     </main>
   );
 }
+export { origRewards };
