@@ -8,6 +8,8 @@ import Header from "./components/Header";
 import Home from "./pages/Home";
 import Redeem from "./pages/Redeem";
 import DailyTasks from "./pages/DailyTasks";
+import ProtectedRoute from "./components/ProtectedRoute";
+
 import { useAuth } from "./hooks/useAuth";
 import { AuthProvider } from "./components/AuthProvider";
 import { db } from "./firebase/firebase_config";
@@ -56,7 +58,7 @@ function AppContent() {
             Redeem
           </Link>
           <Link
-      to="/daily"
+      to="/tasks"
       className="bg-bigbox text-darkgreen px-6 py-2 rounded-lg font-semibold hover:bg-smallbox transition shadow-md"
     >
       Daily Tasks
@@ -65,52 +67,52 @@ function AppContent() {
       )}
 
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<Home isLoggedIn={isLoggedIn} />} />
-        <Route
-          path="/profile"
-          element={
-            isLoggedIn ? (
-              <Profile habits={habits} toggleHabit={toggleHabit} />
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
-        <Route
-          path="/stats"
-          element={
-            isLoggedIn ? (
-              <Stats habits={habits} />
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
-                <Route
-          path="/redeem"
-          element={
-            isLoggedIn ? (
-              <Redeem />
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
-        <Route
-  path="/daily"
-  element={
-    isLoggedIn ? (
-      <DailyTasks />
-    ) : (
-      <Navigate to="/login" />
-    )
-  }
-/>
-
         <Route
           path="/login"
           element={!isLoggedIn ? <Login /> : <Navigate to="/profile" />}
         />
+
+        {/* Protected Routes */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile habits={habits} toggleHabit={toggleHabit} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/stats"
+          element={
+            <ProtectedRoute>
+              <Stats habits={habits} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/redeem"
+          element={
+            <ProtectedRoute>
+              <Redeem />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/tasks"
+          element={
+            <ProtectedRoute>
+              <DailyTasks />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>
   );
