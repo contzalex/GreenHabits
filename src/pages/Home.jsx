@@ -145,14 +145,6 @@ export default function Home({ isLoggedIn, user }) {
         Stay motivated and track your eco-friendly activities every day. 
         Together we can make small changes that lead to a big impact 🌍.
       </p>
-      {location.pathname !== "/login" && (
-        <Link
-          to="/login"
-          className="inline-block bg-[#F5EFE6] text-[#2d5016] font-medium px-6 py-2.5 rounded-2xl shadow-md hover:opacity-90 transition"
-        >
-          Learn More
-        </Link>
-      )}
     </div>
 
     {/* Formular Login */}

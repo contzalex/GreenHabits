@@ -50,7 +50,7 @@ const Login = () => {
   };
 
   return (
-    <div className="w-[430px] bg-bigbox p-8 rounded-2xl shadow-lg mx-auto mt-4">
+    <div className="w-[430px] bg-bigbox p-8 rounded-2xl shadow-lg mx-auto mt-25">
       <h2 className="text-3xl font-semibold text-center text-darkgreen mb-6">
         {isLoginMode ? "Welcome Back!" : "Create an Account"}
       </h2>

@@ -138,7 +138,7 @@ export default function Profile() {
             <img
               src={logoutIcon}
               alt="Logout"
-              className="w-6 h-6 invert"
+              className="w-6 h-6"
             />
           </button>
         </div>
