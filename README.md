@@ -20,7 +20,7 @@
 
 ## License
 
-This project is licensed under the GNU General Public License. See the [LICENSE](LICENSE.MD) file for details.  
+This project is licensed under a propietary licence. See the [LICENSE](LICENSE.MD) file for details.  
 
 ---
 
