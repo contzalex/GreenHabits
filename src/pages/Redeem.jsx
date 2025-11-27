@@ -1,10 +1,10 @@
-import { origRewards, categoryLabels } from "../content_pages/Redeem/RewardsData";
-import RewardCard from "../content_pages/Redeem/RewardCard";
-import RedeemedList from "../content_pages/Redeem/RedeemedList";
-import FilterSortControls from "../content_pages/Redeem/FilterSortControls";
-import PopupRedeem from "../content_pages/Redeem/PopupRedeem";
-import DetailsModal from "../content_pages/Redeem/DetailsModal";
-import { useRedeemState } from "../content_pages/Redeem/hooks";
+import { origRewards, categoryLabels } from "../content_pages/redeem/RewardsData";
+import RewardCard from "../content_pages/redeem/RewardCard";
+import RedeemedList from "../content_pages/redeem/RedeemedList";
+import FilterSortControls from "../content_pages/redeem/FilterSortControls";
+import PopupRedeem from "../content_pages/redeem/PopupRedeem";
+import DetailsModal from "../content_pages/redeem/DetailsModal";
+import { useRedeemState } from "../content_pages/redeem/hooks";
 
 export default function Redeem() {
   // Import stare și funcții din custom hook
