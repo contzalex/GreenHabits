@@ -4,7 +4,7 @@ import RedeemedList from "../content_pages/redeem/RedeemedList";
 import FilterSortControls from "../content_pages/redeem/FilterSortControls";
 import PopupRedeem from "../content_pages/redeem/PopupRedeem";
 import DetailsModal from "../content_pages/redeem/DetailsModal";
-import { useRedeemState } from "../content_pages/redeem/hooks";
+import { useRedeemState } from "../content_pages/redeem/Hooks";
 
 export default function Redeem() {
   // Import stare și funcții din custom hook
