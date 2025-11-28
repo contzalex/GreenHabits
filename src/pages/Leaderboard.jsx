@@ -38,6 +38,10 @@ export default function Leaderboard() {
         />
       )}
 
+      <div className="max-w-7xl mx-auto mt-6 px-4">
+        <SortControls fields={fields} selectedField={selectedField} setSelectedField={setSelectedField} />
+      </div>
+
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-6">
         <LeaderboardGlobal users={globalSorted} selectedField={selectedField} />
         <div className="w-full md:w-1/2 flex flex-col h-full gap-6 min-w-[320px]">
@@ -48,10 +52,6 @@ export default function Leaderboard() {
             onAddFriendClick={() => setShowModal(true)}
           />
         </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto mt-6 px-4">
-        <SortControls fields={fields} selectedField={selectedField} setSelectedField={setSelectedField} />
       </div>
     </main>
   );
